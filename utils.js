@@ -198,18 +198,35 @@ export function calculateZ(f_max, base, independiente) {
 }
 
 export function completeIteration(vars, x, independiente, base, f_max) {
-    let iteration_number = 1;
-    
+    let iteration_number = 0;
+    console.log("------------------------------------------------------")
+    console.log("-------------------ALGORITMO SIMPLEX------------------")
+    console.log("------------------------------------------------------")
+    console.log(" ")
+
     // Localizar las variables artificiales
     let artificial_vars_pos = locateArtificialVars(base);
-    
-    // Tabla invalida -> sumar la ultima fila
-    validateTableAddLastRow(artificial_vars_pos, x);
     
     //Calcular z
     let z = calculateZwithArtificialVars(artificial_vars_pos, independiente);
     
+    consoleOut(iteration_number, x , independiente, base, z)
+    iteration_number++;
     
+    
+    
+    console.log("------------------------------------------------------")
+    console.log("-----------------VALIDACION DE LA TABLA---------------")
+    console.log("------------------------------------------------------")
+    console.log(" ")
+
+    // Tabla invalida -> sumar a la ultima fila
+    validateTableAddLastRow(artificial_vars_pos, x);
+
+    consoleOut(iteration_number, x , independiente, base, z)
+    iteration_number++;
+
+
     while (z != 0) {
         firstIteration(vars, x, independiente, base, z)
         artificial_vars_pos = locateArtificialVars(base);
@@ -231,6 +248,11 @@ export function completeIteration(vars, x, independiente, base, f_max) {
     // Calcular nueva z
     z = calculateZ(f_max, base, independiente);
     
+    console.log("------------------------------------------------------")
+    console.log("-----------------VALIDACION DE LA TABLA---------------")
+    console.log("------------------------------------------------------")
+    console.log(" ")
+
     consoleOut(iteration_number, x , independiente, base, z)
     iteration_number++;
     
