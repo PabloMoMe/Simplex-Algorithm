@@ -1,8 +1,9 @@
-export function firstIteration(vars, x, independiente, base, z, f_max_AV){
+export function firstIteration(vars, x, independiente, base, z){
+    let f_max_AV = getFunctionToMax(x);
     secondIteration(vars, x, independiente, base, z, f_max_AV)
 }
 
-export function secondIteration(vars, x, independiente, base, z, f_max) {
+export function secondIteration(vars, x, independiente, base, f_max) {
     // Obtener variable que entra
     let max = x[0][x[0].length - 1]
     let index_x = 0
@@ -74,7 +75,7 @@ export function secondIteration(vars, x, independiente, base, z, f_max) {
     }
     
     //Calcular nuevo valor de z
-    z=calculateZ(f_max, base, independiente)
+    let z=calculateZ(f_max, base, independiente)
     
     return [x,independiente,base,z]
 }
@@ -94,14 +95,15 @@ export function getFunctionToMax(x) {
     return f_max;
 }
 
-export function consoleOut(i, x , independiente, base, z) {
+export function consoleOut(iteration_number, x , independiente, base, z) {
     console.log("-----------------------------------")
     
-    console.log("Iteracion " + i.toString() + ":")
+    console.log("Iteracion " + iteration_number.toString() + ":")
     console.log(x)
     console.log(independiente)
     console.log(base)
     console.log(z)
+
 }
 
 export function locateArtificialVars(base) {
@@ -129,7 +131,7 @@ export function calculateZwithArtificialVars(artificial_vars_pos, independiente)
     let z = 0;
 
     for (let i = 0; i < artificial_vars_pos.length; i++) {
-        z = z + independiente[artificial_vars_pos[i]]
+        z = z - independiente[artificial_vars_pos[i]]
     }
 
     return z;
@@ -182,7 +184,70 @@ export function calculateZ(f_max, base, independiente) {
         let valor = typeof (independiente[isValue]) == 'undefined' ? 0 : independiente[isValue]
         z = z + f_max[i - 1] * valor;
     }
-    z = -z
 
-    return z;
+    return -z;
 }
+
+export function completeIteration(vars, x, independiente, base, f_max) {
+    let iteration_number = 1;
+    
+    // Localizar las variables artificiales
+    let artificial_vars_pos = locateArtificialVars(base);
+    
+    // Tabla invalida -> sumar la ultima fila
+    validateTableAddLastRow(artificial_vars_pos, x);
+    
+    //Calcular z
+    let z = calculateZwithArtificialVars(artificial_vars_pos, independiente);
+    
+    
+    while (z != 0) {
+        firstIteration(vars, x, independiente, base, z)
+        artificial_vars_pos = locateArtificialVars(base);
+        z = calculateZwithArtificialVars(artificial_vars_pos, independiente)
+        consoleOut(iteration_number, x , independiente, base, z)
+        iteration_number++;
+    }
+    
+    // Eliminar las variables auxiliares
+    removeAuxiliarVars(vars, x);
+
+    // Sustituir funcion objetivo
+    changeObjectiveFunction(f_max, x);
+    
+    // Hacer cero los coeficientes de la base
+    makeZeroToBaseCoeficients(base, vars, x)
+    
+    // Calcular nueva z
+    z = calculateZ(f_max, base, independiente);
+    
+    consoleOut(iteration_number, x , independiente, base, z)
+    iteration_number++;
+    
+    console.log("------------------------------------------------------")
+    console.log("----------------------SEGUNDA FASE--------------------")
+    console.log("------------------------------------------------------")
+    console.log(" ")
+
+    secondPhase(vars, x, independiente, base, f_max, iteration_number)
+}
+
+export function secondPhase(vars, x, independiente, base, f_max, iteration_number) {
+    let z;
+    while (!isOptimal(x)){
+        [x,independiente,base,z] = secondIteration(vars, x,independiente,base,f_max);
+        consoleOut(iteration_number, x , independiente, base, z)
+        iteration_number++;  
+    }
+}
+
+export async function loadExample(example_number){
+    let data = await fetch('./examples.json')
+                        .then(res => res.json())
+                        .then(examples => examples.filter(example => example["example_number"] == example_number))
+                        .then(example => example[0])
+    
+
+    return [data["x"], data["independiente"], data["base"], data["variable_names"], data["f_max_coeficients"]]
+}
+
