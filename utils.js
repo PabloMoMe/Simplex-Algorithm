@@ -45,9 +45,6 @@ export function secondIteration(vars, x, independiente, base, f_max) {
     // Remplazar variable
     base.splice(base.indexOf(var_out), 1, var_in)
 
-    //console.log(var_in)
-    //console.log(var_out)
-
     // Dividir la fila por el pivote
     let pivot = x[index_x][index]
 
@@ -97,13 +94,25 @@ export function getFunctionToMax(x) {
 
 export function consoleOut(iteration_number, x , independiente, base, z) {
     console.log("-----------------------------------")
-    
     console.log("Iteracion " + iteration_number.toString() + ":")
-    console.log(x)
-    console.log(independiente)
-    console.log(base)
-    console.log(z)
+    console.log("-----------------------------------")
 
+    console.log("Columnas de la matriz")
+    x.forEach(col => console.log("[" + col.toString() + "]"));
+    console.log("")
+
+    console.log("Columna independiente")
+    console.log("[" + independiente.toString() + "]")
+    console.log("")
+
+    console.log("Columna base")
+    console.log("[" + base.toString() + "]")
+    console.log("")
+
+    console.log("Valor Z")
+    console.log(z.toString())
+    console.log("")
+    
 }
 
 export function locateArtificialVars(base) {
@@ -206,6 +215,7 @@ export function completeIteration(vars, x, independiente, base, f_max) {
         artificial_vars_pos = locateArtificialVars(base);
         z = calculateZwithArtificialVars(artificial_vars_pos, independiente)
         consoleOut(iteration_number, x , independiente, base, z)
+        
         iteration_number++;
     }
     
@@ -237,6 +247,7 @@ export function secondPhase(vars, x, independiente, base, f_max, iteration_numbe
     while (!isOptimal(x)){
         [x,independiente,base,z] = secondIteration(vars, x,independiente,base,f_max);
         consoleOut(iteration_number, x , independiente, base, z)
+        
         iteration_number++;  
     }
 }
@@ -250,4 +261,13 @@ export async function loadExample(example_number){
 
     return [data["x"], data["independiente"], data["base"], data["variable_names"], data["f_max_coeficients"]]
 }
+
+// Source - https://stackoverflow.com/a
+// Posted by Dan Dascalescu, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-01-29, License - CC BY-SA 4.0
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 
